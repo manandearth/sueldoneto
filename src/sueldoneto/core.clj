@@ -7,6 +7,15 @@
    [expound.alpha :as expound])
   (:gen-class))
 
+(spec/def ::annual-gross pos-int?)
+(spec/def ::installments #{12 14})
+(spec/def ::age pos-int?)
+(spec/def ::personal-situation #{"A" "B" "C"})
+(spec/def ::contract #{"G" "M"})
+(spec/def ::professional-category #{"A" "B" "C" "D" "E" "F" "G" "H" "I" "J" "K"})
+(spec/def ::data (spec/keys :req-un
+                            [::annual-gross ::installments ::personal-situation ::contract ::age ::professional-category]))
+
 (def data (atom nil))
 
 (defn get-input
