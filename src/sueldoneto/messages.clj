@@ -26,5 +26,9 @@
                                    "[I] Oficiales de tercera y Especialistas"
                                    "[J] Peones"
                                    "[K] Trabajadores menores de dieciocho años, cualquiera"]
-                           :error "Accepta solo -> \"A\" \"B\" \"C\" \"D\" \"E\" \"F\" \"G\" \"H\" \"I\" \"J\" o \"K\""}})
+                           :error "Accepta solo -> \"A\" \"B\" \"C\" \"D\" \"E\" \"F\" \"G\" \"H\" \"I\" \"J\" o \"K\""}
+   :children              {:pre   "Número de hijos menores de 25 años:"
+                           :error "Accepta solo -> Cantidad en números"}
+   :young-children        {:pre   "De sus hijos, cuántos tienen menos de 3 años?"
+                           :error "Accepta solo -> Cantidad en números"}})
 

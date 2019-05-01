@@ -15,6 +15,8 @@
 (spec/def ::personal-situation #{"A" "B" "C"})
 (spec/def ::contract boolean?)
 (spec/def ::professional-category #{"A" "B" "C" "D" "E" "F" "G" "H" "I" "J" "K"})
+(spec/def ::children  nat-int?)
+(spec/def ::young-children  nat-int?)
 (spec/def ::data (spec/keys :req-un
                             [::annual-gross ::installments ::personal-situation ::contract ::age ::professional-category]))
 
@@ -26,13 +28,33 @@
   (let [input (clojure.string/trim (read-line))]
     input))
 
+(defn prompt-young-children
+  []
+  (println (get-in messages [:young-children :pre]))
+  (try
+    (let [young-children (coerce! ::young-children (get-input))]
+      (swap! data #(assoc % :young-children young-children))
+      (println "pagas" (:installments @data) "sueldo anual: " (:annual-gross @data) "Situación familiar:" (:personal-situation @data) "Edad:" (:age @data) "contracto" (:contract @data) "Professional category:" (:professional-category @data) "children: " (:children @data) "young children" (:young-children @data)))
+    (catch Exception _ (println (get-in messages [:young-children :error]))
+           (prompt-young-children))))
+
+(defn prompt-children
+  []
+  (println (get-in messages [:children :pre]))
+  (try
+    (let [children (coerce! ::children (get-input))]
+      (swap! data #(assoc % :children children))
+      (prompt-young-children))
+    (catch Exception _ (println (get-in messages [:children :error]))
+           (prompt-children))))
+
 (defn prompt-professional-category
   []
   (mapv println (get-in messages [:professional-category :pre]))
   (try
     (let [professional-category (coerce! ::professional-category (get-input))]
       (swap! data #(assoc % :professional-category professional-category))
-      (println "pagas" (:installments @data) "sueldo anual: " (:annual-gross @data) "Situación familiar:" (:personal-situation @data) "Edad:" (:age @data) "contracto" (:contract @data) "Professional category:" (:professional-category @data)))
+      (prompt-children))
     (catch Exception _ (println (get-in messages [:professional-category :error]))
            (prompt-professional-category))))
 

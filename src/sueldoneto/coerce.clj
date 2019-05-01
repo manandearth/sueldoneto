@@ -3,11 +3,13 @@
    [clojure.spec.alpha :as spec]))
 
 (def built-in-coercions
-  {`::annual-gross #(Integer/parseInt %)
-   `::installments #(Integer/parseInt %)
-   `::age          #(Integer/parseInt %)
-   `::contract #(cond (= % "G") true
-                      (= % "I") false)})
+  {`:sueldoneto.core/annual-gross   #(Integer/parseInt %)
+   `:sueldoneto.core/installments   #(Integer/parseInt %)
+   `:sueldoneto.core/age            #(Integer/parseInt %)
+   `:sueldoneto.core/contract       #(cond (= % "G") true
+                                           (= % "I") false)
+   `:sueldoneto.core/children       #(Integer/parseInt %)
+   `:sueldoneto.core/young-children #(Integer/parseInt %)})
 
 (defn coerce [key value]
   (let [coerce-fn (get built-in-coercions key identity)]
@@ -24,3 +26,4 @@
   (let [v (coerce spec v)]
     (check! spec v)
     v))
+
