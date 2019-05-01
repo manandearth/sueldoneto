@@ -20,7 +20,8 @@
   {`::annual-gross #(Integer/parseInt %)
    `::installments #(Integer/parseInt %)
    `::age          #(Integer/parseInt %)
-   `::contract #(if (= % "G") true false)})
+   `::contract #(cond (= % "G") true
+                      (= % "I") false)})
 
 (defn coerce [key value]
   (let [coerce-fn (get built-in-coercions key identity)]
@@ -72,16 +73,22 @@
   []
   (println "Tipo de contrato laboral:")
   (println "[G] general [I] Duración inferior a doce meses")
-  (let [contract (coerce! ::contract (get-input))]
-    (swap! data #(assoc % :contract contract))
-    (prompt-professional-category)))
+  (try
+    (let [contract (coerce! ::contract (get-input))]
+      (swap! data #(assoc % :contract contract))
+      (prompt-professional-category))
+    (catch Exception e (println e)
+           (prompt-contract))))
 
 (defn prompt-age
   []
   (println "Edad:")
-  (let [age (coerce! ::age (get-input))]
-    (swap! data #(assoc % :age age))
-    (prompt-contract)))
+  (try
+    (let [age (coerce! ::age (get-input))]
+      (swap! data #(assoc % :age age))
+      (prompt-contract))
+    (catch Exception _ (println "Años en números")
+           (prompt-age))))
 
 (defn prompt-personal-situation
   []
@@ -89,23 +96,32 @@
   (println "[A] Soltero, viudo, divorciado o separado con hijos a cargo")
   (println "[B] Casado y cuyo cónyuge no obtiene rentas superiores a 1.500 euros anuales")
   (println "[C] Otros")
-  (let [personal-situation (coerce! ::personal-situation (get-input))]
-    (swap! data #(assoc % :personal-situation personal-situation))
-    (prompt-age)))
+  (try
+    (let [personal-situation (coerce! ::personal-situation (get-input))]
+      (swap! data #(assoc % :personal-situation personal-situation))
+      (prompt-age))
+    (catch Exception _ (println "uno de los tres:")
+           (prompt-personal-situation))))
 
 (defn prompt-installments
   []
   (println "Número de pagas:")
-  (let [installments (coerce ::installments (get-input))]
-    (swap! data #(assoc % :installments installments))
-    (prompt-personal-situation)))
+  (try
+    (let [installments (coerce ::installments (get-input))]
+      (swap! data #(assoc % :installments installments))
+      (prompt-personal-situation))
+    (catch Exception _ (println "en números")
+           (prompt-installments))))
 
 (defn prompt-annual-gross
   []
   (println "Sueldo bruto anual:")
-  (let [annual-gross (coerce! ::annual-gross (get-input))]
-    (swap! data #(assoc % :annual-gross annual-gross))
-    (prompt-installments)))
+  (try
+    (let [annual-gross (coerce! ::annual-gross (get-input))]
+      (swap! data #(assoc % :annual-gross annual-gross))
+      (prompt-installments))
+    (catch Exception _ (println "en números")
+           (prompt-annual-gross))))
 
 (defn start-app []
   (println "Calculadora de sueldo neto")
