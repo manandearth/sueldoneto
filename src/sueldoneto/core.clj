@@ -4,7 +4,8 @@
    [clojure.spec.alpha :as spec]
    [orchestra.core :refer [defn-spec]]
    [orchestra.spec.test :as st]
-   [expound.alpha :as expound])
+   [expound.alpha :as expound]
+   [sueldoneto.messages :refer [messages]])
   (:gen-class))
 
 (spec/def ::annual-gross pos-int?)
@@ -42,14 +43,6 @@
 
 (def data (atom nil))
 
-(def error-messages
-  {:annual-gross          "Accepta solo -> Euros en números"
-   :installments          "Accepta solo -> 12 o 14"
-   :age                   "Accepta solo -> Años en números"
-   :personal-situation    "Accepta solo -> \"A\" \"B\" o \"C\""
-   :contract              "Accepta solo \"G\" o \"I\""
-   :professional-category "Accepta solo -> \"A\" \"B\" \"C\" \"D\" \"E\" \"F\" \"G\" \"H\" \"I\" \"J\" o \"K\""})
-
 (defn get-input
   "get user input"
   []
@@ -58,77 +51,62 @@
 
 (defn prompt-professional-category
   []
-  (println "Categoría profesional:")
-  (println "[A] Ingenieros y Licenciados")
-  (println "[B] Ingenieros Técnicos, Peritos y Ayudantes Titulados")
-  (println "[C] Jefes Administrativos y de Taller")
-  (println "[D] Ayudantes no Titulados")
-  (println "[E] Oficiales Administrativos")
-  (println "[F] Subalternos")
-  (println "[G] Auxiliares Administrativos")
-  (println "[H] Oficiales de primera y segunda")
-  (println "[I] Oficiales de tercera y Especialistas")
-  (println "[J] Peones")
-  (println "[K] Trabajadores menores de dieciocho años, cualquiera")
+  (mapv println (get-in messages [:professional-category :pre]))
   (try
     (let [professional-category (coerce! ::professional-category (get-input))]
       (swap! data #(assoc % :professional-category professional-category))
       (println "pagas" (:installments @data) "sueldo anual: " (:annual-gross @data) "Situación familiar:" (:personal-situation @data) "Edad:" (:age @data) "contracto" (:contract @data) "Professional category:" (:professional-category @data)))
-    (catch Exception _ (println (:professional-category error-messages))
+    (catch Exception _ (println (get-in messages [:professional-category :error]))
            (prompt-professional-category))))
 
 (defn prompt-contract
   []
-  (println "Tipo de contrato laboral:")
-  (println "[G] general [I] Duración inferior a doce meses")
+  (mapv println (get-in messages [:contract :pre]))
   (try
     (let [contract (coerce! ::contract (get-input))]
       (swap! data #(assoc % :contract contract))
       (prompt-professional-category))
-    (catch Exception _ (println (:contact error-messages))
+    (catch Exception _ (println (get-in messages [:contract :error]))
            (prompt-contract))))
 
 (defn prompt-age
   []
-  (println "Edad:")
+  (println (get-in messages [:age :pre]))
   (try
     (let [age (coerce! ::age (get-input))]
       (swap! data #(assoc % :age age))
       (prompt-contract))
-    (catch Exception _ (println (:age error-messages))
+    (catch Exception _ (println (get-in messages [:age :error]))
            (prompt-age))))
 
 (defn prompt-personal-situation
   []
-  (println "Situación familiar:")
-  (println "[A] Soltero, viudo, divorciado o separado con hijos a cargo")
-  (println "[B] Casado y cuyo cónyuge no obtiene rentas superiores a 1.500 euros anuales")
-  (println "[C] Otros")
+  (mapv println (get-in messages [:personal-situation :pre]))
   (try
     (let [personal-situation (coerce! ::personal-situation (get-input))]
       (swap! data #(assoc % :personal-situation personal-situation))
       (prompt-age))
-    (catch Exception _ (println (:personal-situation error-messages))
+    (catch Exception _ (println (get-in messages [:personal-situation :error]))
            (prompt-personal-situation))))
 
 (defn prompt-installments
   []
-  (println "Número de pagas:")
+  (println (get-in messages [:installments :pre]))
   (try
     (let [installments (coerce ::installments (get-input))]
       (swap! data #(assoc % :installments installments))
       (prompt-personal-situation))
-    (catch Exception _ (println (:installments error-messages))
+    (catch Exception _ (println (get-in messages [:installments :error]))
            (prompt-installments))))
 
 (defn prompt-annual-gross
   []
-  (println "Sueldo bruto anual:")
+  (println (get-in messages [:annual-gross :pre]))
   (try
     (let [annual-gross (coerce! ::annual-gross (get-input))]
       (swap! data #(assoc % :annual-gross annual-gross))
       (prompt-installments))
-    (catch Exception _ (println (:annual-gross error-messages))
+    (catch Exception _ (println (get-in messages [:annual-gross :error]))
            (prompt-annual-gross))))
 
 (defn start-app []
