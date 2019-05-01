@@ -30,10 +30,9 @@
       (coerce-fn (clojure.string/upper-case value))
       value)))
 
-(defn check! [& args]
-  (doseq [[spec x] (partition 2 args)]
-    (or (spec/valid? spec x)
-        (throw (ex-info "Validation failed" {:explanation (spec/explain-str spec x)})))))
+(defn check! [spec value]
+  (or (spec/valid? spec value)
+      (throw (ex-info "Validation failed" {:explanation (spec/explain-str spec value)}))))
 
 (defn coerce!
   [spec v]
