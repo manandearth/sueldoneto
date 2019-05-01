@@ -1,36 +1,17 @@
 # sueldoneto
 
-FIXME: description
+A salary calculator for wages in Spain.
+Concept borrowed from: 
+https://cincodias.elpais.com/herramientas/calculadora-sueldo-neto/
 
-## Installation
-
-Download from http://example.com/FIXME.
 
 ## Usage
 
-FIXME: explanation
-
-    $ java -jar sueldoneto-0.1.0-standalone.jar [args]
-
-## Options
-
-FIXME: listing of options this app accepts.
-
-## Examples
-
-...
-
-### Bugs
-
-...
-
-### Any Other Sections
-### That You Think
-### Might be Useful
+lein run
 
 ## License
 
-Copyright © 2019 FIXME
+Copyright © 2019 Adam Gefen
 
 This program and the accompanying materials are made available under the
 terms of the Eclipse Public License 2.0 which is available at
