@@ -16,6 +16,21 @@
 (spec/def ::data (spec/keys :req-un
                             [::annual-gross ::installments ::personal-situation ::contract ::age ::professional-category]))
 
+(def built-in-coercions
+  {`::annual-gross #(Integer/parseInt %)
+   `::installments #(Integer/parseInt %)
+   `::age          #(Integer/parseInt %)})
+
+(defn spec->coerce-sym [spec]
+  (try (spec/form spec) (catch Exception _ nil)))
+
+(defn coerce [key value]
+  (let [form (spec->coerce-sym key)
+        coerce-fn (get built-in-coercions form identity)]
+    (if (string? value)
+      (coerce-fn value)
+      value)))
+
 (def data (atom nil))
 
 (defn get-input
@@ -24,22 +39,62 @@
   (let [input (clojure.string/trim (read-line))]
     input))
 
+(defn prompt-professional-category
+  []
+  (println "Categoría profesional:")
+  (println "[A] Ingenieros y Licenciados")
+  (println "[B] Ingenieros Técnicos, Peritos y Ayudantes Titulados")
+  (println "[C] Jefes Administrativos y de Taller")
+  (println "[D] Ayudantes no Titulados")
+  (println "[E] Oficiales Administrativos")
+  (println "[F] Subalternos")
+  (println "[G] Auxiliares Administrativos")
+  (println "[H] Oficiales de primera y segunda")
+  (println "[I] Oficiales de tercera y Especialistas")
+  (println "[J] Peones")
+  (println "[K] Trabajadores menores de dieciocho años, cualquiera")
+  (let [professional-category (get-input)]
+    (swap! data #(assoc % :professional-category professional-category))
+    (println "pagas" (:installments @data) "sueldo anual: " (:annual-gross @data) "Situación familiar:" (:personal-situation @data) "Edad:" (:age @data) "contracto" (:contract @data) "Professional category:" (:professional-category @data))))
+
+(defn prompt-contract
+  []
+  (println "Tipo de contrato laboral:")
+  (println "[G] general [I] Duración inferior a doce meses")
+  (let [contract (get-input)]
+    (swap! data #(assoc % :contract contract))
+    (prompt-professional-category)))
+
+(defn prompt-age
+  []
+  (println "Edad:")
+  (let [age (coerce ::age (get-input))]
+    (swap! data #(assoc % :age age))
+    (prompt-contract)))
+
 (defn prompt-personal-situation
-  [])
+  []
+  (println "Situación familiar:")
+  (println "[A] Soltero, viudo, divorciado o separado con hijos a cargo")
+  (println "[B] Casado y cuyo cónyuge no obtiene rentas superiores a 1.500 euros anuales")
+  (println "[C] Otros")
+  (let [personal-situation (get-input)]
+    (swap! data #(assoc % :personal-situation personal-situation))
+    (prompt-age)))
 
 (defn prompt-installments
-  [annual-gross]
+  []
   (println "Número de pagas:")
-  (let [installments (get-input)]
+  (let [installments (coerce ::installments (get-input))]
     (swap! data #(assoc % :installments installments))
-    (println "pagas" (:installments @data) "sueldo anual: " (:annual-gross @data))))
+    (prompt-personal-situation)))
 
 (defn prompt-annual-gross
   []
   (println "Sueldo bruto anual:")
-  (let [annual-gross (get-input)]
+  (let [annual-gross (coerce ::annual-gross (get-input))]
     (swap! data #(assoc % :annual-gross annual-gross))
-    (prompt-installments annual-gross)))
+    (prompt-installments)))
 
 (defn start-app []
   (println "Calculadora de sueldo neto")
