@@ -11,7 +11,7 @@
 (spec/def ::installments #{12 14})
 (spec/def ::age pos-int?)
 (spec/def ::personal-situation #{"A" "B" "C"})
-(spec/def ::contract #{"G" "M"})
+(spec/def ::contract boolean?)
 (spec/def ::professional-category #{"A" "B" "C" "D" "E" "F" "G" "H" "I" "J" "K"})
 (spec/def ::data (spec/keys :req-un
                             [::annual-gross ::installments ::personal-situation ::contract ::age ::professional-category]))
@@ -19,17 +19,28 @@
 (def built-in-coercions
   {`::annual-gross #(Integer/parseInt %)
    `::installments #(Integer/parseInt %)
-   `::age          #(Integer/parseInt %)})
-
-(defn spec->coerce-sym [spec]
-  (try (spec/form spec) (catch Exception _ nil)))
+   `::age          #(Integer/parseInt %)
+   `::contract #(if (= % "G") true false)})
 
 (defn coerce [key value]
-  (let [form (spec->coerce-sym key)
-        coerce-fn (get built-in-coercions form identity)]
+  (let [coerce-fn (get built-in-coercions key identity)]
     (if (string? value)
-      (coerce-fn value)
+      (coerce-fn (clojure.string/upper-case value))
       value)))
+
+(defn check! [& args]
+  (doseq [[spec x] (partition 2 args)]
+    (or (spec/valid? spec x)
+        (do
+          (expound/expound spec x)
+          (throw (ex-info "Validation failed" {:explanation (spec/explain-str spec x)})))))
+  true)
+
+(defn coerce!
+  [spec v]
+  (let [v (coerce spec v)]
+    (check! spec v)
+    v))
 
 (def data (atom nil))
 
@@ -53,7 +64,7 @@
   (println "[I] Oficiales de tercera y Especialistas")
   (println "[J] Peones")
   (println "[K] Trabajadores menores de dieciocho años, cualquiera")
-  (let [professional-category (get-input)]
+  (let [professional-category (coerce! ::professional-category (get-input))]
     (swap! data #(assoc % :professional-category professional-category))
     (println "pagas" (:installments @data) "sueldo anual: " (:annual-gross @data) "Situación familiar:" (:personal-situation @data) "Edad:" (:age @data) "contracto" (:contract @data) "Professional category:" (:professional-category @data))))
 
@@ -61,14 +72,14 @@
   []
   (println "Tipo de contrato laboral:")
   (println "[G] general [I] Duración inferior a doce meses")
-  (let [contract (get-input)]
+  (let [contract (coerce! ::contract (get-input))]
     (swap! data #(assoc % :contract contract))
     (prompt-professional-category)))
 
 (defn prompt-age
   []
   (println "Edad:")
-  (let [age (coerce ::age (get-input))]
+  (let [age (coerce! ::age (get-input))]
     (swap! data #(assoc % :age age))
     (prompt-contract)))
 
@@ -78,7 +89,7 @@
   (println "[A] Soltero, viudo, divorciado o separado con hijos a cargo")
   (println "[B] Casado y cuyo cónyuge no obtiene rentas superiores a 1.500 euros anuales")
   (println "[C] Otros")
-  (let [personal-situation (get-input)]
+  (let [personal-situation (coerce! ::personal-situation (get-input))]
     (swap! data #(assoc % :personal-situation personal-situation))
     (prompt-age)))
 
@@ -92,7 +103,7 @@
 (defn prompt-annual-gross
   []
   (println "Sueldo bruto anual:")
-  (let [annual-gross (coerce ::annual-gross (get-input))]
+  (let [annual-gross (coerce! ::annual-gross (get-input))]
     (swap! data #(assoc % :annual-gross annual-gross))
     (prompt-installments)))
 
