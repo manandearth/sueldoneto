@@ -45,6 +45,14 @@
 
 (def data (atom nil))
 
+(def error-messages
+  {:annual-gross          "Accepta solo -> Euros en números"
+   :installments          "Accepta solo -> 12 o 14"
+   :age                   "Accepta solo -> Años en números"
+   :personal-situation    "Accepta solo -> \"A\" \"B\" o \"C\""
+   :contract              "Accepta solo \"G\" o \"I\""
+   :professional-category "Accepta solo -> \"A\" \"B\" \"C\" \"D\" \"E\" \"F\" \"G\" \"H\" \"I\" \"J\" o \"K\""})
+
 (defn get-input
   "get user input"
   []
@@ -65,9 +73,12 @@
   (println "[I] Oficiales de tercera y Especialistas")
   (println "[J] Peones")
   (println "[K] Trabajadores menores de dieciocho años, cualquiera")
-  (let [professional-category (coerce! ::professional-category (get-input))]
-    (swap! data #(assoc % :professional-category professional-category))
-    (println "pagas" (:installments @data) "sueldo anual: " (:annual-gross @data) "Situación familiar:" (:personal-situation @data) "Edad:" (:age @data) "contracto" (:contract @data) "Professional category:" (:professional-category @data))))
+  (try
+    (let [professional-category (coerce! ::professional-category (get-input))]
+      (swap! data #(assoc % :professional-category professional-category))
+      (println "pagas" (:installments @data) "sueldo anual: " (:annual-gross @data) "Situación familiar:" (:personal-situation @data) "Edad:" (:age @data) "contracto" (:contract @data) "Professional category:" (:professional-category @data)))
+    (catch Exception _ (println (:professional-category error-messages))
+           (prompt-professional-category))))
 
 (defn prompt-contract
   []
@@ -77,7 +88,7 @@
     (let [contract (coerce! ::contract (get-input))]
       (swap! data #(assoc % :contract contract))
       (prompt-professional-category))
-    (catch Exception e (println e)
+    (catch Exception _ (println (:contact error-messages))
            (prompt-contract))))
 
 (defn prompt-age
@@ -87,7 +98,7 @@
     (let [age (coerce! ::age (get-input))]
       (swap! data #(assoc % :age age))
       (prompt-contract))
-    (catch Exception _ (println "Años en números")
+    (catch Exception _ (println (:age error-messages))
            (prompt-age))))
 
 (defn prompt-personal-situation
@@ -100,7 +111,7 @@
     (let [personal-situation (coerce! ::personal-situation (get-input))]
       (swap! data #(assoc % :personal-situation personal-situation))
       (prompt-age))
-    (catch Exception _ (println "uno de los tres:")
+    (catch Exception _ (println (:personal-situation error-messages))
            (prompt-personal-situation))))
 
 (defn prompt-installments
@@ -110,7 +121,7 @@
     (let [installments (coerce ::installments (get-input))]
       (swap! data #(assoc % :installments installments))
       (prompt-personal-situation))
-    (catch Exception _ (println "en números")
+    (catch Exception _ (println (:installments error-messages))
            (prompt-installments))))
 
 (defn prompt-annual-gross
@@ -120,7 +131,7 @@
     (let [annual-gross (coerce! ::annual-gross (get-input))]
       (swap! data #(assoc % :annual-gross annual-gross))
       (prompt-installments))
-    (catch Exception _ (println "en números")
+    (catch Exception _ (println (:annual-gross error-messages))
            (prompt-annual-gross))))
 
 (defn start-app []
