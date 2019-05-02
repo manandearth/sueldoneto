@@ -34,7 +34,9 @@
     input))
 
 (defn ppdata [db]
-  (println "pagas" (:installments @db) "sueldo anual: " (:annual-gross @db) "Situación familiar:" (:personal-situation @db) "Edad:" (:age @db) "contracto" (:contract @db) "Professional category:" (:professional-category @db) "children: " (:children @db) "young children" (:young-children @db) "en exclusiva:" (:exclusivity @db) "ascendientes:" (:ancestors @db) "mayores ascendientes:" (:old-ancestors @db) "descapacitados:" (:disabled-dependents @db) "contribuyentes con minimos:" (:receiving-benefits @db)))
+  (do (println "Pagas" (:installments @db) "\nSueldo anual: " (:annual-gross @db) "\nSituación familiar:" (:personal-situation @db) "\nEdad:" (:age @db) "\ncontrato" (:contract @db) "\nProfessional category:" (:professional-category @db))
+      (clojure.pprint/print-table [{"Niños" (:children @db) "Niños menores a 3 años" (:young-children @db) "En exclusiva" (:exclusivity @db)}])
+      (clojure.pprint/print-table [{"Ascendientes" (:ancestors @db) "Mayores ascendientes" (:old-ancestors @db) "Descapacitados" (:disabled-dependents @db) "Contribuyentes con minimos" (:receiving-benefits @db)}])))
 
 (defn prompt-receiving-benefits
   []
