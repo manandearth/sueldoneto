@@ -50,8 +50,12 @@
                      (catch Exception e (.getMessage e))))
 
             expected)
-      1 "1"
-      "Validation failed" "3")))
+      1                          "1"
+      "Validation failed"        "3"
+      2                          "2"
+      "Validation failed"        "-1"
+      0                          "0"
+      "For input string: \"NO\"" "no")))
 
 (comment
   (run-tests))
