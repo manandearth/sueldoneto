@@ -1,10 +1,10 @@
-(ns sueldoneto.core-test
-  (:require [clojure.test :refer :all]
-            [clojure.spec.alpha :as spec]
-            [clojure.spec.gen.alpha :as gen]
-            [clojure.spec.test.alpha :as stest]
-            [sueldoneto.core :refer :all]
-            [sueldoneto.coerce :refer :all]))
+p (ns sueldoneto.core-test
+    (:require [clojure.test :refer :all]
+              [clojure.spec.alpha :as spec]
+              [clojure.spec.gen.alpha :as gen]
+              [clojure.spec.test.alpha :as stest]
+              [sueldoneto.core :refer :all]
+              [sueldoneto.coerce :refer :all]))
 
 (deftest check-test
   (testing "check! resilience"
@@ -59,3 +59,4 @@
 
 (comment
   (run-tests))
+

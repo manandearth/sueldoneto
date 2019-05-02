@@ -18,14 +18,29 @@
 (spec/def ::contract boolean?)
 (spec/def ::professional-category #{"A" "B" "C" "D" "E" "F" "G" "H" "I" "J" "K"})
 (spec/def ::children  nat-int?)
-(spec/def ::young-children  (spec/and #(>= (:children @data)  %) nat-int?))
+(spec/def ::young-children  (spec/and #(>= (:children @data) %) nat-int?))
 (spec/def ::exclusivity boolean?)
 (spec/def ::ancestors nat-int?)
 (spec/def ::old-ancestors nat-int?)
 (spec/def ::disabled-dependents nat-int?)
 (spec/def ::receiving-benefits nat-int?)
+(spec/def ::m-grade-disabled-descendants (spec/and
+                                          #(>= (:children @data) %)
+                                          nat-int?))
+
+(spec/def ::m-grade-disabled-ancestors (spec/and
+                                        #(>= (+ (:ancestors @data) (:old-ancestors @data)) %)
+                                        nat-int?))
+
+(spec/def ::h-grade-disabled-descendants (spec/and
+                                          #(>= (- (:children @data) (:m-grade-disabled-descendants @data)) %)
+                                          nat-int?))
+(spec/def ::h-grade-disabled-ancestors (spec/and
+                                        #(>= (- (+ (:ancestors @data) (:old-ancestors @data)) (:m-grade-disabled-ancestors @data)) %)
+                                        nat-int?))
+
 (spec/def ::data (spec/keys :req-un
-                            [::annual-gross ::installments ::personal-situation ::contract ::age ::professional-category ::children ::young-children ::exclusivity ::ancestors ::old-ancestors ::disabled-dependents ::receiving-benefits]))
+                            [::annual-gross ::installments ::personal-situation ::contract ::age ::professional-category ::children ::young-children ::exclusivity ::ancestors ::old-ancestors ::disabled-dependents ::receiving-benefits ::m-grade-disabled-descendants ::m-grade-disabled-ancestors ::h-grade-disabled-descendants ::h-grade-disabled-ancestors]))
 
 (defn get-input
   "get user input"
@@ -34,9 +49,71 @@
     input))
 
 (defn ppdata [db]
-  (do (println "Pagas" (:installments @db) "\nSueldo anual: " (:annual-gross @db) "\nSituación familiar:" (:personal-situation @db) "\nEdad:" (:age @db) "\ncontrato" (:contract @db) "\nProfessional category:" (:professional-category @db))
-      (clojure.pprint/print-table [{"Niños" (:children @db) "Niños menores a 3 años" (:young-children @db) "En exclusiva" (:exclusivity @db)}])
-      (clojure.pprint/print-table [{"Ascendientes" (:ancestors @db) "Mayores ascendientes" (:old-ancestors @db) "Descapacitados" (:disabled-dependents @db) "Contribuyentes con minimos" (:receiving-benefits @db)}])))
+  (do (println {"Pagas"                                      (:installments @db)
+                "\nSueldo anual: "                           (:annual-gross @db)
+                "\nSituación familiar:"                      (:personal-situation @db)
+                "\nEdad:"                                    (:age @db)
+                "\ncontrato"                                 (:contract @db)
+                "\nProfessional category:"                   (:professional-category @db)
+                "\nNiños"                                    (:children @db)
+                "\nNiños menores a 3 años"                   (:young-children @db)
+                "\nEn exclusiva"                             (:exclusivity @db)
+                "\nAscendientes"                             (:ancestors @db)
+                "\nMayores ascendientes"                     (:old-ancestors @db)
+                "\nDescapacitados"                           (:disabled-dependents @db)
+                "\nContribuyentes con minimos"               (:receiving-benefits @db)
+                "\nDescendientes discapacitados 33% y a 65%" (:m-grade-disabled-descendants @db)
+                "\nAscendientes discapacitados 33% a 65%"    (:m-grade-disabled-ancestors @db)
+                "\nDescendientes discapacitados al 65%"      (:h-grade-disabled-descendants @db)
+                "\nAscendientes discapacitados al 65%"       (:h-grade-disabled-ancestors @db)})))
+
+(defn prompt-h-grade-disabled-ancestors
+  []
+  (println (get-in messages [:h-grade-disabled-ancestors :pre]))
+  (try
+    (let [h-grade-disabled-ancestors (coerce! ::h-grade-disabled-ancestors (get-input))]
+      (swap! data #(assoc % :h-grade-disabled-ancestors h-grade-disabled-ancestors))
+      (ppdata data))
+    (catch Exception e (if (= (.getMessage e) "Vlidation failed")
+                         (println (get-in messages [:h-grade-disabled-ancestors :alt-error]))
+                         (println (get-in messages [:h-grade-disabled-ancestors :error])))
+           (prompt-h-grade-disabled-ancestors))))
+
+(defn prompt-h-grade-disabled-descendants
+  []
+  (println (get-in messages [:h-grade-disabled-descendants :pre]))
+  (try
+    (let [h-grade-disabled-descendants (coerce! ::h-grade-disabled-descendants (get-input))]
+      (swap! data #(assoc % :h-grade-disabled-descendants h-grade-disabled-descendants))
+      (prompt-h-grade-disabled-ancestors))
+    (catch Exception e (if (= (.getMessage e) "Validation failed")
+                         (println (get-in messages [:h-grade-disabled-descendants :alt-error]))
+                         (println (get-in messages [:h-grade-disabled-descendants :error])))
+           (prompt-h-grade-disabled-descendants))))
+
+(defn prompt-m-grade-disabled-ancestors
+  []
+  (println (get-in messages [:m-grade-disabled-ancestors :pre]))
+  (try
+    (let [m-grade-disabled-ancestors (coerce! ::m-grade-disabled-ancestors (get-input))]
+      (swap! data #(assoc % :m-grade-disabled-ancestors m-grade-disabled-ancestors))
+      (prompt-h-grade-disabled-descendants))
+    (catch Exception e (if (= (.getMessage e) "Validation failed")
+                         (println (get-in messages [:m-grade-disabled-ancestors :alt-error]))
+                         (println (get-in messages [:m-grade-disabled-ancestors :error])))
+           (prompt-m-grade-disabled-ancestors))))
+
+(defn prompt-m-grade-disabled-descendants
+  []
+  (println (get-in messages [:m-grade-disabled-descendants :pre]))
+  (try
+    (let [m-grade-disabled-descendants (coerce! ::m-grade-disabled-descendants (get-input))]
+      (swap! data #(assoc % :m-grade-disabled-descendants m-grade-disabled-descendants))
+      (prompt-m-grade-disabled-ancestors))
+    (catch Exception e (if (= (.getMessage e) "Validation failed")
+                         (println (get-in messages [:m-grade-disabled-descendants :alt-error]))
+                         (println (get-in messages [:m-grade-disabled-descendants :error])))
+           (prompt-m-grade-disabled-descendants))))
 
 (defn prompt-receiving-benefits
   []
@@ -44,7 +121,7 @@
   (try
     (let [receiving-benefits (coerce! ::receiving-benefits (get-input))]
       (swap! data #(assoc % :receiving-benefits receiving-benefits))
-      (ppdata data))
+      (prompt-m-grade-disabled-descendants))
     (catch Exception _ (println (get-in messages [:receiving-benefits :error]))
            (prompt-receiving-benefits))))
 
