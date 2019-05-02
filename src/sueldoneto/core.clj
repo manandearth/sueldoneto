@@ -9,6 +9,8 @@
    [sueldoneto.coerce :refer :all])
   (:gen-class))
 
+(def data (atom nil))
+
 (spec/def ::annual-gross pos-int?)
 (spec/def ::installments #{12 14})
 (spec/def ::age pos-int?)
@@ -16,11 +18,9 @@
 (spec/def ::contract boolean?)
 (spec/def ::professional-category #{"A" "B" "C" "D" "E" "F" "G" "H" "I" "J" "K"})
 (spec/def ::children  nat-int?)
-(spec/def ::young-children  nat-int?)
+(spec/def ::young-children  (spec/and #(>= (:children @data)  %) nat-int?))
 (spec/def ::data (spec/keys :req-un
                             [::annual-gross ::installments ::personal-situation ::contract ::age ::professional-category]))
-
-(def data (atom nil))
 
 (defn get-input
   "get user input"
@@ -35,7 +35,9 @@
     (let [young-children (coerce! ::young-children (get-input))]
       (swap! data #(assoc % :young-children young-children))
       (println "pagas" (:installments @data) "sueldo anual: " (:annual-gross @data) "Situación familiar:" (:personal-situation @data) "Edad:" (:age @data) "contracto" (:contract @data) "Professional category:" (:professional-category @data) "children: " (:children @data) "young children" (:young-children @data)))
-    (catch Exception _ (println (get-in messages [:young-children :error]))
+    (catch Exception e (if (= (.getMessage e) "Validation failed")
+                         (println (get-in messages [:young-children :alt-error]))
+                         (println (get-in messages [:young-children :error])))
            (prompt-young-children))))
 
 (defn prompt-children
@@ -92,7 +94,7 @@
   []
   (println (get-in messages [:installments :pre]))
   (try
-    (let [installments (coerce ::installments (get-input))]
+    (let [installments (coerce! ::installments (get-input))]
       (swap! data #(assoc % :installments installments))
       (prompt-personal-situation))
     (catch Exception _ (println (get-in messages [:installments :error]))

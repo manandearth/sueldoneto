@@ -30,5 +30,6 @@
    :children              {:pre   "Número de hijos menores de 25 años:"
                            :error "Accepta solo -> Cantidad en números"}
    :young-children        {:pre   "De sus hijos, cuántos tienen menos de 3 años?"
-                           :error "Accepta solo -> Cantidad en números"}})
+                           :error "Accepta solo -> Cantidad en números"
+                           :alt-error "Accepta catindad igual o inferior al campo anterior"}})
 
