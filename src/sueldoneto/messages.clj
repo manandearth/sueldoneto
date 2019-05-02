@@ -53,5 +53,7 @@
                                   :alt-error "Accepta cantindad igual o inferior al cantidad de niños con menos de 25 años menos los con grado de discapacidad entre el 33% y el 65%"}
    :h-grade-disabled-ancestors   {:pre       "Número de ascendientes con grado de discapacidad igual o superior al 65%"
                                   :error     "Accepta solo -> Cantidad en números"
-                                  :alt-error "Accepta cantidad igual o inferior al cantidad de ascendientes mayores que 65 años a cargo menos los con grado de discapacidad entre el 33% y el 65%"}})
+                                  :alt-error "Accepta cantidad igual o inferior al cantidad de ascendientes mayores que 65 años a cargo menos los con grado de discapacidad entre el 33% y el 65%"}
+   :disability {:pre ["Disacpacidad (del contribuyente):" "[A] no tiene ninguna descapacidad" "[B] Grado de discapacidad entre el 33% y el 65%" "[C] Grado de discapacidad igual o superior al 65% o con movilidad reducida"]
+                :error "Accepta solo -> \"A\" \"B\" o \"C\""}})
 

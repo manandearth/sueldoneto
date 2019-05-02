@@ -38,9 +38,10 @@
 (spec/def ::h-grade-disabled-ancestors (spec/and
                                         #(>= (- (+ (:ancestors @data) (:old-ancestors @data)) (:m-grade-disabled-ancestors @data)) %)
                                         nat-int?))
+(spec/def ::disability #{"A" "B" "C"})
 
 (spec/def ::data (spec/keys :req-un
-                            [::annual-gross ::installments ::personal-situation ::contract ::age ::professional-category ::children ::young-children ::exclusivity ::ancestors ::old-ancestors ::disabled-dependents ::receiving-benefits ::m-grade-disabled-descendants ::m-grade-disabled-ancestors ::h-grade-disabled-descendants ::h-grade-disabled-ancestors]))
+                            [::annual-gross ::installments ::personal-situation ::contract ::age ::professional-category ::children ::young-children ::exclusivity ::ancestors ::old-ancestors ::disabled-dependents ::receiving-benefits ::m-grade-disabled-descendants ::m-grade-disabled-ancestors ::h-grade-disabled-descendants ::h-grade-disabled-ancestors ::disability]))
 
 (defn get-input
   "get user input"
@@ -65,7 +66,18 @@
                           "\nDescendientes discapacitados 33% y a 65%" (:m-grade-disabled-descendants @db)
                           "\nAscendientes discapacitados 33% a 65%"    (:m-grade-disabled-ancestors @db)
                           "\nDescendientes discapacitados al 65%"      (:h-grade-disabled-descendants @db)
-                          "\nAscendientes discapacitados al 65%"       (:h-grade-disabled-ancestors @db)))))
+                          "\nAscendientes discapacitados al 65%"       (:h-grade-disabled-ancestors @db)
+                          "\nDiscapacidad"                             (:disability @db)))))
+
+(defn prompt-disability
+  []
+  (println (get-in messages [:disability :pre]))
+  (try
+    (let [disability (coerce! ::disability (get-input))]
+      (swap! data #(assoc % :disability disability))
+      (ppdata data))
+    (catch Exception _ (println (get-in messages [:disability :error]))
+           (prompt-disability))))
 
 (defn prompt-h-grade-disabled-ancestors
   []
@@ -73,7 +85,7 @@
   (try
     (let [h-grade-disabled-ancestors (coerce! ::h-grade-disabled-ancestors (get-input))]
       (swap! data #(assoc % :h-grade-disabled-ancestors h-grade-disabled-ancestors))
-      (ppdata data))
+      (prompt-disability))
     (catch Exception e (if (= (.getMessage e) "Vlidation failed")
                          (println (get-in messages [:h-grade-disabled-ancestors :alt-error]))
                          (println (get-in messages [:h-grade-disabled-ancestors :error])))
