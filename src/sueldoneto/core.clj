@@ -5,11 +5,10 @@
    [orchestra.core :refer [defn-spec]]
    [orchestra.spec.test :as st]
    [expound.alpha :as expound]
-   [sueldoneto.messages :refer [messages]]
-   [sueldoneto.coerce :refer :all])
+   [sueldoneto.messages :refer :all]
+   [sueldoneto.coerce :refer :all]
+   [sueldoneto.logic :refer :all])
   (:gen-class))
-
-(def data (atom nil))
 
 (spec/def ::annual-gross pos-int?)
 (spec/def ::installments #{12 14})
@@ -67,7 +66,8 @@
                           "\nAscendientes discapacitados 33% a 65%"    (:m-grade-disabled-ancestors @db)
                           "\nDescendientes discapacitados al 65%"      (:h-grade-disabled-descendants @db)
                           "\nAscendientes discapacitados al 65%"       (:h-grade-disabled-ancestors @db)
-                          "\nDiscapacidad"                             (:disability @db)))))
+                          "\nDiscapacidad"                             (:disability @db)
+                          "\n"                                         (calc)))))
 
 (defn prompt-disability
   []
