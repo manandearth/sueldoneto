@@ -67,7 +67,7 @@
                           "\nDescendientes discapacitados al 65%"      (:h-grade-disabled-descendants @db)
                           "\nAscendientes discapacitados al 65%"       (:h-grade-disabled-ancestors @db)
                           "\nDiscapacidad"                             (:disability @db)
-                          "\n"                                         (calc)))))
+                          "\nResult-map"                               (calc)))))  ;TODO -> make a table of results
 
 (defn prompt-disability
   []
