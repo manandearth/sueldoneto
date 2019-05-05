@@ -126,5 +126,3 @@
                        (- s-social-contribution irpf))]
     {:net-wage (/ annual-net installments) :s-social-contribution (/  s-social-contribution installments) :irpf (/ irpf installments)}))
 
-(calc)
-
