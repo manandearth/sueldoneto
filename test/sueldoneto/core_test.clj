@@ -58,6 +58,29 @@
       0                          "0"
       "For input string: \"NO\"" "no")))
 
+;;-------------------
+;;ns sueldoneto.logic
+;;-------------------
+(deftest max-s-social-test
+  (are [expected stub]
+       (= (do (swap! data #(assoc % :contract stub))
+              (max-s-social)) expected)
+    (* 45014.4 0.0635) true
+    (* 45014.4 0.064) false))
+
+(deftest s-social-test
+  (are [expected annual-gross contract]
+       (= (do (swap! data #(assoc % :contract contract :annual-gross annual-gross))
+              (s-social)) expected)
+    1280.0 20000 false
+    1270.0 20000 true
+    1920.0 30000 false
+    1905.0 30000 true
+    0.0    0     true))
 (comment
   (run-tests))
 
+;;Helper in building tests
+(comment (do
+           (swap! data #(assoc % :contract true :annual-gross 30000))
+           (s-social)))

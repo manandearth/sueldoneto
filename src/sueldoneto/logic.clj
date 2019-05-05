@@ -16,29 +16,26 @@
     (-> max-gross
         (* (if contract 0.0635 0.064)))))
 
-(defn cuota-mensual-pagar []
-  (let [{:keys [annual-gross professional-category]} @data
-        datos (case professional-category
-                "A" {:min 1052.9 :max 3751.2}
-                "B" {:min 956.1 :max 3751.2}
-                "C" {:min 831.6 :max 3751.2}
-                "D" {:min 825.6 :max 3751.2}
-                "E" {:min 825.6 :max 3751.2}
-                "F" {:min 825.6 :max 3751.2}
-                "G" {:min 825.6 :max 3751.2}
-                "H" {:min 825.6 :max 3751.2}
-                "I" {:min 825.6 :max 3751.2}
-                "J" {:min 825.6 :max 3751.2}
-                "K" {:min 825.6 :max 3751.2})]
-    (if (< (/ annual-gross 12) (:min datos))
-      (* 0.0635 (:min datos))
-      (if (> (/ annual-gross 12) (:max datos))
+(comment ;TODO find a more interesting implemntation of this
+  (defn cuota-mensual-pagar []
+    (let [{:keys [annual-gross professional-category]} @data
+          datos (case professional-category
+                  "A" {:min 1052.9 :max 3751.2}
+                  "B" {:min 956.1 :max 3751.2}
+                  "C" {:min 831.6 :max 3751.2}
+                  "D" {:min 825.6 :max 3751.2}
+                  "E" {:min 825.6 :max 3751.2}
+                  "F" {:min 825.6 :max 3751.2}
+                  "G" {:min 825.6 :max 3751.2}
+                  "H" {:min 825.6 :max 3751.2}
+                  "I" {:min 825.6 :max 3751.2}
+                  "J" {:min 825.6 :max 3751.2}
+                  "K" {:min 825.6 :max 3751.2})]
+      (if (< (/ annual-gross 12) (:min datos))
         (* 0.0635 (:min datos))
-        (* (/ annual-gross 12) 0.0635)))))
-
-(let [{:keys [annual-gross professional-category]} @data]
-  (/ annual-gross 12))
-(* 12 1052.9)
+        (if (> (/ annual-gross 12) (:max datos))
+          (* 0.0635 (:min datos))
+          (* (/ annual-gross 12) 0.0635))))))
 
 (defn s-social
   []
