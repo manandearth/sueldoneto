@@ -95,6 +95,23 @@
     9750       "C" 30000
     9750       "C" 50000))
 
+(deftest children-allowance-test
+  (are [expected children young-children]
+       (= expected
+          (do (swap! data #(assoc % :children children :young-children young-children))
+              (children-allowance)))
+    0     0 0
+    2400  1 0
+    5100  2 0
+    9100  3 0
+    13600 4 0
+    18100 5 0
+    22600 6 0
+    5200  1 1
+    7900  2 1
+    10700 2 2
+    26500 5 3))
+
 (deftest disabled-dependants-allowance-test
   (are [expected ancestors children m-grade-disabled-ancestors m-grade-disabled-descendants h-grade-disabled-ancestors h-grade-disabled-descendants]
        (= (do (swap! data #(assoc % :children children :ancestors ancestors :m-grade-disabled-ancestors m-grade-disabled-ancestors :m-grade-disabled-descendants m-grade-disabled-descendants :h-grade-disabled-ancestors h-grade-disabled-ancestors :h-grade-disabled-descendants h-grade-disabled-descendants))
