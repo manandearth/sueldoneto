@@ -97,7 +97,9 @@
         h-grade (+ h-grade-disabled-ancestors h-grade-disabled-descendants)]
     (+ (* m-grade 3000) (* h-grade 9000))))
 
-(def total-allowance (+ (ancestor-allowance) (children-allowance) (disability-allowance) (disabled-dependants-allowence)))
+(defn total-allowance
+  []
+  (+ (ancestor-allowance) (children-allowance) (disability-allowance) (disabled-dependants-allowance)))
 
 (defn family-situation-exemption
   []
@@ -120,7 +122,7 @@
   []
   (let [{:keys [annual-gross]} @data
         net-profit (- annual-gross (s-social))
-        base (- net-profit total-allowance)
+        base (- net-profit (total-allowance))
         a (if (<= base 12450) base 12450)
         b (if (<= base 20200) 0 (- base 12450))
         c (if (<= base 35200) 0 (- base 20200))
