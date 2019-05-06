@@ -90,7 +90,7 @@
       (+ (* ancestors 1150) (* old-ancestors 2550))
       0)))
 
-(defn disabled-dependants-allowence
+(defn disabled-dependants-allowance
   []
   (let [{:keys [m-grade-disabled-descendants m-grade-disabled-ancestors h-grade-disabled-descendants h-grade-disabled-ancestors]} @data
         m-grade (+ m-grade-disabled-ancestors m-grade-disabled-descendants)

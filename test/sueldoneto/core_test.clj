@@ -77,10 +77,26 @@
     1920.0 30000 false
     1905.0 30000 true
     0.0    0     true))
+
+(deftest disabled-dependants-allowance-test
+  (are [expected ancestors  children  m-grade-disabled-ancestors m-grade-disabled-descendants h-grade-disabled-ancestors h-grade-disabled-descendants]
+       (= (do (swap! data #(assoc % :children children :ancestors ancestors :m-grade-disabled-ancestors m-grade-disabled-ancestors :m-grade-disabled-descendants m-grade-disabled-descendants :h-grade-disabled-ancestors h-grade-disabled-ancestors :h-grade-disabled-descendants h-grade-disabled-descendants))
+              (disabled-dependants-allowance)) expected)
+    0     0 0 0 0 0 0
+    0     1 1 0 0 0 0
+    3000  1 1 1 0 0 0
+    6000  1 1 2 0 0 0
+    6000  1 1 1 1 0 0
+    9000  2 1 1 2 0 0
+    9000  0 1 0 0 1 0
+    18000 0 2 0 0 2 0
+    21000 2 1 0 1 2 0
+    9000  0 1 0 0 0 1))
+
 (comment
   (run-tests))
 
 ;;Helper in building tests
-(comment (do
-           (swap! data #(assoc % :contract true :annual-gross 30000))
-           (s-social)))
+(comment
+  (= (do (swap! data #(assoc % :children 1 :ancestors 2 :m-grade-disabled-ancestors 0 :m-grade-disabled-descendants 1 :h-grade-disabled-ancestors 2 :h-grade-disabled-descendants 0))
+         (disabled-dependants-allowance)) 0))
