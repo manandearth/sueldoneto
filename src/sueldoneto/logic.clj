@@ -5,16 +5,23 @@
 
 (def data (atom nil))
 
-(swap! data #(assoc % :annual-gross 30000 :installments 12 :disability "B" :contract true :professional-category "C" :children 3 :young-children 1 :ancestors 1 :old-ancestors 1))
+;;stub -> uncomment in development
 
-;;The cap for annual income's Seguridad Social 3,4% contribution, 
+(comment
+  (swap! data #(assoc % :annual-gross 30000 :installments 12 :disability "B" :contract true :professional-category "C" :children 3 :young-children 1 :ancestors 1 :old-ancestors 1)))
+
+;;The cap for annual income's Seguridad Social 6.4% contribution, 
 
 (def max-gross 45014.4)  ;Euros
+(def general-contract-rate 0.0635)
+(def inferior-contract-rate 0.064)
 
 (defn max-s-social []
   (let [{:keys [contract]} @data]
     (-> max-gross
-        (* (if contract 0.0635 0.064)))))
+        (* (if contract
+             general-contract-rate
+             inferior-contract-rate)))))
 
 (comment ;TODO find a more interesting implemntation of this
   (defn cuota-mensual-pagar []
@@ -41,7 +48,9 @@
   []
   (let [{:keys [annual-gross contract]} @data
         percentage  (-> annual-gross
-                        (* (if contract 0.0635 0.064)))]
+                        (* (if contract
+                             general-contract-rate
+                             inferior-contract-rate)))]
     (if (< percentage (max-s-social))
       percentage
       (max-s-social))))
@@ -60,20 +69,20 @@
                                "C"  7750)]
     (+ base-exemption net-reduction disability-reduction)))
 
-(defn children-allowence
+(defn children-allowance
   []
   (let [{:keys [children young-children]} @data
         extra-children (- children 4)
-        allowence (case children
+        allowance (case children
                     0 0
                     1 2400
                     2 5100
                     3 9100
                     4 13600
                     (+ 13600 (* 4500 extra-children)))]
-    (+ allowence (* 2800 young-children))))
+    (+ allowance (* 2800 young-children))))
 
-(defn ancestor-allowence
+(defn ancestor-allowance
   []
   (let [{:keys [annual-gross ancestors old-ancestors]} @data
         net-profit (- annual-gross (s-social))]
@@ -81,7 +90,7 @@
       (+ (* ancestors 1150) (* old-ancestors 2550))
       0)))
 
-(def total-allowence (+ (ancestor-allowence) (children-allowence) (disability-allowance)))
+(def total-allowance (+ (ancestor-allowance) (children-allowance) (disability-allowance)))
 
 (defn family-situation-exemption
   []
@@ -104,7 +113,7 @@
   []
   (let [{:keys [annual-gross]} @data
         net-profit (- annual-gross (s-social))
-        base (- net-profit total-allowence)
+        base (- net-profit total-allowance)
         a (if (<= base 12450) base 12450)
         b (if (<= base 20200) 0 (- base 12450))
         c (if (<= base 35200) 0 (- base 20200))
