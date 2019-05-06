@@ -78,6 +78,23 @@
     1905.0 30000 true
     0.0    0     true))
 
+(deftest disability-allowance-test
+  (are [expected disability annual-gross]
+       (= (do (swap! data #(assoc % :disability disability :annual-gross annual-gross))
+              (disability-allowance)) expected)
+    2000       "A" 20000
+    5700       "A" 10000
+    2000       "A" 50000
+    5500       "B" 20000
+    8138.5625  "B" 13000
+    5500       "B" 80000
+    9200       "B" 1000
+    9200       "B" 0
+    13450      "C" 1000
+    12388.5625 "C" 13000
+    9750       "C" 30000
+    9750       "C" 50000))
+
 (deftest disabled-dependants-allowance-test
   (are [expected ancestors children m-grade-disabled-ancestors m-grade-disabled-descendants h-grade-disabled-ancestors h-grade-disabled-descendants]
        (= (do (swap! data #(assoc % :children children :ancestors ancestors :m-grade-disabled-ancestors m-grade-disabled-ancestors :m-grade-disabled-descendants m-grade-disabled-descendants :h-grade-disabled-ancestors h-grade-disabled-ancestors :h-grade-disabled-descendants h-grade-disabled-descendants))
