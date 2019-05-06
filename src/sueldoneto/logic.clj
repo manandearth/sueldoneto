@@ -8,7 +8,7 @@
 ;;stub -> uncomment in development
 
 (comment
-  (swap! data #(assoc % :annual-gross 30000 :installments 12 :disability "B" :contract true :professional-category "C" :children 3 :young-children 1 :ancestors 1 :old-ancestors 1)))
+  (swap! data #(assoc % :annual-gross 30000 :installments 12 :disability "B" :contract true :professional-category "C" :children 3 :young-children 1 :ancestors 1 :old-ancestors 1 :m-grade-disabled-ancestors 0 :m-grade-disabled-descendants 0 :h-grade-disabled-ancestors 0 :h-grade-disabled-descendants 1)))
 
 ;;The cap for annual income's Seguridad Social 6.4% contribution, 
 
@@ -90,7 +90,14 @@
       (+ (* ancestors 1150) (* old-ancestors 2550))
       0)))
 
-(def total-allowance (+ (ancestor-allowance) (children-allowance) (disability-allowance)))
+(defn disabled-dependants-allowence
+  []
+  (let [{:keys [m-grade-disabled-descendants m-grade-disabled-ancestors h-grade-disabled-descendants h-grade-disabled-ancestors]} @data
+        m-grade (+ m-grade-disabled-ancestors m-grade-disabled-descendants)
+        h-grade (+ h-grade-disabled-ancestors h-grade-disabled-descendants)]
+    (+ (* m-grade 3000) (* h-grade 9000))))
+
+(def total-allowance (+ (ancestor-allowance) (children-allowance) (disability-allowance) (disabled-dependants-allowence)))
 
 (defn family-situation-exemption
   []
