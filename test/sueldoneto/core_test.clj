@@ -10,7 +10,8 @@
 (deftest check-test
   (testing "check! resilience"
     (are [expected s v]
-         (=  (coerce! s v) expected)
+         (=  expected
+             (coerce! s v))
       12000 :sueldoneto.core/annual-gross          "12000"
       12    :sueldoneto.core/installments          "12"
       "A"   :sueldoneto.core/personal-situation    "A"
@@ -28,8 +29,8 @@
 (deftest check-exception-test
   (testing "check! exceptions"
     (are [expected s v]
-         (=  (try (coerce! s v)
-                  (catch Exception e (.getMessage e))) expected)
+         (= expected (try (coerce! s v)
+                          (catch Exception e (.getMessage e))))
       "For input string: \"MILLION EUROS\"" :sueldoneto.core/annual-gross          "million euros"
       "For input string: \"DOCE\""          :sueldoneto.core/installments          "doce"
       "Validation failed"                   :sueldoneto.core/personal-situation    "F"
@@ -46,11 +47,10 @@
 (deftest check-young-children-conditional
   (testing "coerce young-children"
     (are [expected v]
-         (= (do (swap! data #(assoc % :children 2))
+         (= expected
+            (do (swap! data #(assoc % :children 2))
                 (try (coerce! :sueldoneto.core/young-children v)
-                     (catch Exception e (.getMessage e))))
-
-            expected)
+                     (catch Exception e (.getMessage e)))))
       1                          "1"
       "Validation failed"        "3"
       2                          "2"
@@ -63,15 +63,17 @@
 ;;-------------------
 (deftest max-s-social-test
   (are [expected stub]
-       (= (do (swap! data #(assoc % :contract stub))
-              (max-s-social)) expected)
+       (= expected
+          (do (swap! data #(assoc % :contract stub))
+              (max-s-social)))
     (* 45014.4 0.0635) true
     (* 45014.4 0.064) false))
 
 (deftest s-social-test
   (are [expected annual-gross contract]
-       (= (do (swap! data #(assoc % :contract contract :annual-gross annual-gross))
-              (s-social)) expected)
+       (= expected
+          (do (swap! data #(assoc % :contract contract :annual-gross annual-gross))
+              (s-social)))
     1280.0 20000 false
     1270.0 20000 true
     1920.0 30000 false
@@ -80,8 +82,9 @@
 
 (deftest disability-allowance-test
   (are [expected disability annual-gross]
-       (= (do (swap! data #(assoc % :disability disability :annual-gross annual-gross))
-              (disability-allowance)) expected)
+       (= expected
+          (do (swap! data #(assoc % :disability disability :annual-gross annual-gross))
+              (disability-allowance)))
     2000       "A" 20000
     5700       "A" 10000
     2000       "A" 50000
@@ -114,8 +117,9 @@
 
 (deftest disabled-dependants-allowance-test
   (are [expected ancestors children m-grade-disabled-ancestors m-grade-disabled-descendants h-grade-disabled-ancestors h-grade-disabled-descendants]
-       (= (do (swap! data #(assoc % :children children :ancestors ancestors :m-grade-disabled-ancestors m-grade-disabled-ancestors :m-grade-disabled-descendants m-grade-disabled-descendants :h-grade-disabled-ancestors h-grade-disabled-ancestors :h-grade-disabled-descendants h-grade-disabled-descendants))
-              (disabled-dependants-allowance)) expected)
+       (= expected
+          (do (swap! data #(assoc % :children children :ancestors ancestors :m-grade-disabled-ancestors m-grade-disabled-ancestors :m-grade-disabled-descendants m-grade-disabled-descendants :h-grade-disabled-ancestors h-grade-disabled-ancestors :h-grade-disabled-descendants h-grade-disabled-descendants))
+              (disabled-dependants-allowance)))
     0     0 0 0 0 0 0
     0     1 1 0 0 0 0
     3000  1 1 1 0 0 0
